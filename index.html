@@ -1,0 +1,1899 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mixer T00ns</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23fff8ec'/%3E%3Cpath d='M18 16h28l-5 34H23z' fill='%2312a594' stroke='%23171b26' stroke-width='4'/%3E%3Cpath d='M14 13h36' stroke='%23171b26' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='35' r='8' fill='%23f4b740'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #171b26;
+      --paper: #fff8ec;
+      --panel: rgba(255, 248, 236, 0.88);
+      --teal: #12a594;
+      --coral: #ef5b5b;
+      --gold: #f4b740;
+      --blue: #4968d9;
+      --shadow: rgba(23, 27, 38, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .game-shell {
+      position: relative;
+      width: min(100vw, 1280px);
+      height: min(100vh, 820px);
+      min-height: 520px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(23, 27, 38, 0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(23, 27, 38, 0.05) 1px, transparent 1px),
+        #ffecc6;
+      background-size: 44px 44px;
+      box-shadow: 0 28px 90px var(--shadow);
+      touch-action: none;
+      user-select: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hud {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: grid;
+      grid-template-columns: minmax(260px, 1.05fr) minmax(300px, 0.95fr) auto;
+      gap: 14px;
+      align-items: start;
+      pointer-events: none;
+    }
+
+    .brand,
+    .recipe-card {
+      width: fit-content;
+      max-width: min(520px, calc(100vw - 36px));
+      padding: 10px;
+      background:
+        linear-gradient(135deg, rgba(255, 250, 238, 0.95), rgba(238, 224, 199, 0.9)),
+        var(--panel);
+      border: 2px solid rgba(23, 27, 38, 0.2);
+      border-radius: 8px;
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -7px 18px rgba(91, 72, 49, 0.08),
+        0 13px 28px rgba(23, 27, 38, 0.16);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      width: min(500px, 100%);
+    }
+
+    .brand-mark {
+      width: 104px;
+      height: 84px;
+      object-fit: contain;
+      filter: drop-shadow(0 7px 7px rgba(23, 27, 38, 0.2));
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .recipe-card {
+      justify-self: center;
+      width: min(440px, 100%);
+      max-width: none;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(25px, 3.4vw, 44px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      font-size: 12px;
+      line-height: 1.35;
+      color: rgba(23, 27, 38, 0.68);
+      font-weight: 700;
+    }
+
+    .recipe-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .recipe-heading span {
+      font-size: 10px;
+      line-height: 1;
+      color: rgba(23, 27, 38, 0.62);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .recipe-heading strong {
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 950;
+      text-align: right;
+    }
+
+    .recipe-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .recipe-chip {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 6px 9px 6px 7px;
+      border: 2px solid rgba(23, 27, 38, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 252, 244, 0.62);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        0 4px 0 rgba(23, 27, 38, 0.06);
+      font-weight: 900;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .recipe-chip.is-complete {
+      background: rgba(18, 165, 148, 0.18);
+      border-color: rgba(18, 165, 148, 0.55);
+    }
+
+    .recipe-dot {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(23, 27, 38, 0.12);
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.36);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      filter: drop-shadow(0 2px 1px rgba(23, 27, 38, 0.18));
+    }
+
+    .recipe-count {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .meters {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      justify-content: end;
+      flex-wrap: wrap;
+    }
+
+    .meter {
+      min-width: 88px;
+      padding: 10px 12px 11px;
+      background:
+        linear-gradient(135deg, rgba(255, 250, 238, 0.95), rgba(238, 224, 199, 0.9)),
+        var(--panel);
+      border: 2px solid rgba(23, 27, 38, 0.19);
+      border-radius: 8px;
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.56),
+        inset 0 -6px 13px rgba(91, 72, 49, 0.08),
+        0 11px 24px rgba(23, 27, 38, 0.15);
+      backdrop-filter: blur(14px);
+      text-align: center;
+    }
+
+    .meter span {
+      display: block;
+      font-size: 10px;
+      line-height: 1;
+      color: rgba(23, 27, 38, 0.62);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .meter strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 23px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      pointer-events: none;
+    }
+
+    .overlay.reveal-result {
+      place-items: end center;
+    }
+
+    .dialog {
+      width: min(430px, calc(100vw - 40px));
+      padding: 22px 24px 24px;
+      background:
+        linear-gradient(135deg, rgba(255, 251, 242, 0.96), rgba(239, 225, 202, 0.93)),
+        rgba(255, 248, 236, 0.94);
+      border: 2px solid rgba(23, 27, 38, 0.22);
+      border-radius: 8px;
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.58),
+        inset 0 -9px 24px rgba(91, 72, 49, 0.08),
+        0 24px 54px rgba(23, 27, 38, 0.22);
+      text-align: center;
+      transform: translateY(0);
+      transition: opacity 180ms ease, transform 180ms ease;
+      pointer-events: auto;
+    }
+
+    .overlay.hidden .dialog {
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+    }
+
+    .dialog h2 {
+      margin: 0;
+      font-size: clamp(30px, 5.4vw, 52px);
+      line-height: 0.94;
+      letter-spacing: 0;
+      font-weight: 950;
+    }
+
+    .dialog p {
+      margin: 14px auto 0;
+      max-width: 32ch;
+      color: rgba(23, 27, 38, 0.72);
+      font-weight: 750;
+      line-height: 1.35;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    button {
+      min-width: 140px;
+      min-height: 46px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: var(--ink);
+      color: white;
+      box-shadow: 0 8px 0 rgba(23, 27, 38, 0.18);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 rgba(23, 27, 38, 0.16);
+    }
+
+    button:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 rgba(23, 27, 38, 0.16);
+    }
+
+    button.secondary {
+      background: var(--gold);
+      color: var(--ink);
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      width: min(360px, calc(100vw - 40px));
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(23, 27, 38, 0.88);
+      color: white;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 800;
+      transform: translate(-50%, 0);
+      opacity: 0;
+      transition: opacity 160ms ease, transform 160ms ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -8px);
+    }
+
+    @media (max-width: 720px) {
+      .game-shell {
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+      }
+
+      .hud {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        grid-template-columns: 1fr;
+      }
+
+      .brand {
+        padding: 10px 12px;
+        grid-template-columns: 68px minmax(0, 1fr);
+        gap: 9px;
+        width: fit-content;
+      }
+
+      .brand-mark {
+        width: 68px;
+        height: 56px;
+      }
+
+      .brand p {
+        display: none;
+      }
+
+      .recipe-card {
+        justify-self: start;
+        width: min(100%, 420px);
+        padding: 10px 12px;
+      }
+
+      .recipe-heading {
+        margin-bottom: 8px;
+      }
+
+      .recipe-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .meters {
+        justify-content: start;
+      }
+
+      .meter {
+        min-width: 78px;
+        padding: 8px 10px;
+      }
+
+      .meter strong {
+        font-size: 20px;
+      }
+
+      .overlay {
+        place-items: end center;
+        padding: 18px 16px 184px;
+      }
+
+      .overlay.reveal-result {
+        padding-bottom: 20px;
+      }
+
+      .dialog {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell" id="gameShell" aria-label="Mixer T00ns game">
+    <canvas id="gameCanvas"></canvas>
+
+    <section class="hud" aria-live="polite">
+      <div class="brand">
+        <img class="brand-mark" src="assets/mixer-t00ns-logo.png" alt="Mascot leaning on mixer jar">
+        <div class="brand-copy">
+          <h1>Mixer T00ns</h1>
+          <p>Collect the recipe, dodge the trash, mint a T00n.</p>
+        </div>
+      </div>
+      <div class="recipe-card" aria-label="Recipe target">
+        <div class="recipe-heading">
+          <span>Recipe</span>
+          <strong id="recipeName">Mystery Blend</strong>
+        </div>
+        <div class="recipe-list" id="recipeList"></div>
+      </div>
+      <div class="meters">
+        <div class="meter">
+          <span>Level</span>
+          <strong id="levelMeter">1/4</strong>
+        </div>
+        <div class="meter">
+          <span>Lives</span>
+          <strong id="livesMeter">4</strong>
+        </div>
+        <div class="meter">
+          <span>Blend</span>
+          <strong id="blendMeter">0/10</strong>
+        </div>
+        <div class="meter">
+          <span>Score</span>
+          <strong id="scoreMeter">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="overlay" id="overlay" aria-live="polite">
+      <div class="dialog">
+        <h2 id="overlayTitle">Ready?</h2>
+        <p id="overlayText">Ten ingredients unlock the character.</p>
+        <div class="dialog-actions">
+          <button id="primaryAction" type="button">Start Blend</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast">Blend ready</div>
+  </main>
+
+  <script>
+    const shell = document.getElementById("gameShell");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayText = document.getElementById("overlayText");
+    const primaryAction = document.getElementById("primaryAction");
+    const recipeName = document.getElementById("recipeName");
+    const recipeList = document.getElementById("recipeList");
+    const levelMeter = document.getElementById("levelMeter");
+    const livesMeter = document.getElementById("livesMeter");
+    const blendMeter = document.getElementById("blendMeter");
+    const scoreMeter = document.getElementById("scoreMeter");
+    const toast = document.getElementById("toast");
+
+    const gameAssets = {
+      background: loadImage("assets/clay-lab-background.png"),
+      backgrounds: [
+        loadImage("assets/level-1-background.png"),
+        loadImage("assets/level-2-background.png"),
+        loadImage("assets/level-3-background.png"),
+        loadImage("assets/level-4-background.png")
+      ],
+      drops: loadImage("assets/drops-sprite-sheet.png"),
+      memeDrops: loadImage("assets/meme-drops.png"),
+      mascot: loadImage("assets/mascot-reveal.png"),
+      mascots: loadImage("assets/mascot-variants.png"),
+      poop: loadImage("assets/poop-hazard.png")
+    };
+
+    const COLORS = {
+      ink: "#171b26",
+      paper: "#fff8ec",
+      teal: "#12a594",
+      coral: "#ef5b5b",
+      gold: "#f4b740",
+      blue: "#4968d9",
+      mint: "#73d99f",
+      purple: "#9c63d9",
+      smoke: "#6e7685",
+      tar: "#2d3038"
+    };
+
+    const ITEM_TYPES = [
+      { id: "grill", name: "Grill", color: COLORS.gold, accent: "#fff0a3", value: 18, sides: 14, sprite: 0 },
+      { id: "star", name: "Star", color: COLORS.paper, accent: "#d7f4ff", value: 12, sides: 5, sprite: 1 },
+      { id: "charm", name: "Charm", color: COLORS.tar, accent: "#f4f4f4", value: 14, sides: 16, sprite: 2 },
+      { id: "glasses", name: "Glasses", color: COLORS.coral, accent: "#ffb0a8", value: 13, sides: 4, sprite: 3 },
+      { id: "cash", name: "Cash", color: COLORS.mint, accent: "#d8ffd9", value: 15, sides: 4, sprite: 4 },
+      { id: "key", name: "Key", color: "#d8c28d", accent: "#fff2c9", value: 11, sides: 4, sprite: 5 },
+      { id: "phones", name: "Phones", color: COLORS.smoke, accent: COLORS.tar, value: 16, sides: 10, sprite: 6 },
+      { id: "candy", name: "Candy", color: COLORS.coral, accent: "#ffd0d0", value: 13, sides: 16, sprite: 7 },
+      { id: "cigar", name: "Cigar", color: "#8a573c", accent: COLORS.gold, value: 12, sides: 12, sprite: 8 },
+      { id: "blob", name: "Blue Blob", color: COLORS.blue, accent: "#bceeff", value: 14, sides: 8, sprite: 9 },
+      { id: "doge", name: "Doge", color: "#d9a13a", accent: "#fff0bd", value: 17, sides: 16, asset: "meme", sprite: 0 },
+      { id: "pepe", name: "Pepe", color: "#5f943e", accent: "#e18445", value: 17, sides: 16, asset: "meme", sprite: 1 }
+    ];
+
+    const BAD_TYPES = [
+      { id: "burnt", name: "Burnt Bit", color: COLORS.tar, accent: "#ef5b5b", value: -18, sides: 8, bad: true, sprite: 10 },
+      { id: "static", name: "Static Chunk", color: COLORS.smoke, accent: "#f4b740", value: -14, sides: 4, bad: true, sprite: 11 },
+      { id: "poop", name: "Poop", color: "#8a573c", accent: COLORS.gold, value: -24, sides: 12, bad: true, asset: "poop" }
+    ];
+
+    const ALL_DROP_TYPES = [...ITEM_TYPES, ...BAD_TYPES];
+
+    const MASCOT_VARIANTS = [
+      { name: "Base T00n", color: COLORS.blue, accent: COLORS.gold, sprite: 0 },
+      { name: "Specs T00n", color: COLORS.blue, accent: COLORS.coral, sprite: 1 },
+      { name: "DJ T00n", color: COLORS.blue, accent: COLORS.smoke, sprite: 2 },
+      { name: "Suit T00n", color: COLORS.blue, accent: COLORS.gold, sprite: 3 }
+    ];
+
+    const mascotCharacter = MASCOT_VARIANTS[0];
+
+    const LEVELS = [
+      {
+        name: "Clay Kitchen",
+        background: 0,
+        recipe: { name: "Gold Mouth", needs: { grill: 2, candy: 1, star: 1, charm: 1 }, character: mascotCharacter },
+        baseSpawnEvery: 930,
+        minSpawnEvery: 420,
+        spawnStep: 38,
+        speedMin: 145,
+        speedMax: 220,
+        speedPerCatch: 8,
+        speedCap: 130,
+        badChanceBase: 0.05,
+        badChanceGrowth: 0.012,
+        badChanceCap: 0.14,
+        badSpeedBonus: 16,
+        backgroundWash: 0.08
+      },
+      {
+        name: "Meme Pantry",
+        background: 1,
+        recipe: { name: "Office Drip", needs: { key: 2, phones: 1, cash: 2, glasses: 1 }, character: mascotCharacter },
+        baseSpawnEvery: 810,
+        minSpawnEvery: 360,
+        spawnStep: 42,
+        speedMin: 165,
+        speedMax: 250,
+        speedPerCatch: 11,
+        speedCap: 165,
+        badChanceBase: 0.08,
+        badChanceGrowth: 0.014,
+        badChanceCap: 0.18,
+        badSpeedBonus: 28,
+        backgroundWash: 0.06
+      },
+      {
+        name: "Rooftop Run",
+        background: 2,
+        recipe: { name: "Meme Sugar", needs: { doge: 2, pepe: 1, candy: 2, cigar: 2 }, character: mascotCharacter },
+        baseSpawnEvery: 700,
+        minSpawnEvery: 310,
+        spawnStep: 46,
+        speedMin: 185,
+        speedMax: 285,
+        speedPerCatch: 14,
+        speedCap: 205,
+        badChanceBase: 0.11,
+        badChanceGrowth: 0.017,
+        badChanceCap: 0.24,
+        badSpeedBonus: 44,
+        backgroundWash: 0.04
+      },
+      {
+        name: "Factory Finale",
+        background: 3,
+        recipe: { name: "Pepe Protocol", needs: { pepe: 2, doge: 2, grill: 2, phones: 2 }, character: mascotCharacter },
+        baseSpawnEvery: 590,
+        minSpawnEvery: 260,
+        spawnStep: 50,
+        speedMin: 210,
+        speedMax: 320,
+        speedPerCatch: 17,
+        speedCap: 245,
+        badChanceBase: 0.14,
+        badChanceGrowth: 0.019,
+        badChanceCap: 0.3,
+        badSpeedBonus: 62,
+        backgroundWash: 0.02
+      }
+    ];
+
+    const itemById = ITEM_TYPES.reduce((lookup, item) => {
+      lookup[item.id] = item;
+      return lookup;
+    }, {});
+
+    const state = {
+      mode: "menu",
+      width: 1,
+      height: 1,
+      dpr: 1,
+      lastTime: 0,
+      spawnClock: 0,
+      spawnEvery: 620,
+      baseSpawnEvery: 900,
+      levelIndex: 0,
+      score: 0,
+      caught: 0,
+      target: 10,
+      lives: 4,
+      maxLives: 4,
+      lifeCooldown: 0,
+      recipe: null,
+      recipeProgress: {},
+      combo: 0,
+      comboClock: 0,
+      mixClock: 0,
+      revealClock: 0,
+      screenKick: 0,
+      jarPulse: 0,
+      activeCharacter: mascotCharacter,
+      pointerActive: false,
+      keys: new Set(),
+      items: [],
+      particles: [],
+      splashes: [],
+      floaters: []
+    };
+
+    const jar = {
+      x: 0,
+      targetX: 0,
+      y: 0,
+      width: 122,
+      height: 126,
+      velocity: 0
+    };
+
+    const rand = (min, max) => min + Math.random() * (max - min);
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+    function loadImage(src) {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = src;
+      return image;
+    }
+
+    function isImageReady(image) {
+      return image.complete && image.naturalWidth > 0 && image.naturalHeight > 0;
+    }
+
+    function drawImageCover(image, x, y, width, height) {
+      const imageRatio = image.naturalWidth / image.naturalHeight;
+      const targetRatio = width / height;
+      let sourceWidth = image.naturalWidth;
+      let sourceHeight = image.naturalHeight;
+      let sourceX = 0;
+      let sourceY = 0;
+
+      if (imageRatio > targetRatio) {
+        sourceWidth = image.naturalHeight * targetRatio;
+        sourceX = (image.naturalWidth - sourceWidth) / 2;
+      } else {
+        sourceHeight = image.naturalWidth / targetRatio;
+        sourceY = (image.naturalHeight - sourceHeight) / 2;
+      }
+
+      ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+    }
+
+    function recipeTotal(recipe) {
+      return Object.keys(recipe.needs).reduce((sum, id) => sum + recipe.needs[id], 0);
+    }
+
+    function currentLevel() {
+      return LEVELS[state.levelIndex] || LEVELS[0];
+    }
+
+    function chooseLevelRecipe() {
+      const level = currentLevel();
+      const recipe = level.recipe;
+      state.recipe = recipe;
+      state.recipeProgress = {};
+      for (const id of Object.keys(recipe.needs)) {
+        state.recipeProgress[id] = 0;
+      }
+      state.target = recipeTotal(recipe);
+      state.baseSpawnEvery = level.baseSpawnEvery;
+      state.spawnEvery = level.baseSpawnEvery;
+    }
+
+    function chooseMascotVariant() {
+      state.activeCharacter = MASCOT_VARIANTS[Math.floor(Math.random() * MASCOT_VARIANTS.length)];
+    }
+
+    function setRecipeThumbnail(dot, item) {
+      if (item.asset === "meme") {
+        dot.style.backgroundImage = "url('assets/meme-drops.png')";
+        dot.style.backgroundSize = "200% 100%";
+        dot.style.backgroundPosition = (item.sprite || 0) === 0 ? "0% 0%" : "100% 0%";
+        return;
+      }
+
+      dot.style.backgroundImage = "url('assets/drops-sprite-sheet.png')";
+      dot.style.backgroundSize = "400% 300%";
+      const xPos = (item.sprite % 4) * 33.333;
+      const yPos = Math.floor(item.sprite / 4) * 50;
+      dot.style.backgroundPosition = xPos + "% " + yPos + "%";
+    }
+
+    function updateRecipeHUD() {
+      if (!state.recipe) {
+        recipeName.textContent = "Mystery Blend";
+        recipeList.innerHTML = "";
+        return;
+      }
+
+      recipeName.textContent = state.recipe.name;
+      recipeList.innerHTML = "";
+      for (const id of Object.keys(state.recipe.needs)) {
+        const item = itemById[id];
+        const current = state.recipeProgress[id] || 0;
+        const needed = state.recipe.needs[id];
+        const chip = document.createElement("div");
+        chip.className = "recipe-chip" + (current >= needed ? " is-complete" : "");
+        chip.style.setProperty("--chip-color", item.color);
+        chip.innerHTML = `
+          <span class="recipe-dot" aria-hidden="true"></span>
+          <span class="recipe-count">${item.name} ${current}/${needed}</span>
+        `;
+        const dot = chip.querySelector(".recipe-dot");
+        setRecipeThumbnail(dot, item);
+        recipeList.appendChild(chip);
+      }
+    }
+
+    function resize() {
+      const rect = shell.getBoundingClientRect();
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      state.width = Math.max(320, rect.width);
+      state.height = Math.max(480, rect.height);
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      jar.width = clamp(state.width * 0.13, 92, 138);
+      jar.height = clamp(state.height * 0.16, 108, 144);
+      jar.y = state.height - jar.height * 0.6 - 28;
+      if (!jar.x) {
+        jar.x = state.width / 2;
+        jar.targetX = jar.x;
+      }
+      jar.x = clamp(jar.x, jar.width * 0.55, state.width - jar.width * 0.55);
+      jar.targetX = clamp(jar.targetX, jar.width * 0.55, state.width - jar.width * 0.55);
+    }
+
+    function resetGame() {
+      state.levelIndex = 0;
+      state.score = 0;
+      startLevel();
+    }
+
+    function startNextLevel() {
+      if (state.levelIndex >= LEVELS.length - 1) {
+        resetGame();
+        return;
+      }
+
+      state.levelIndex += 1;
+      startLevel();
+    }
+
+    function startLevel() {
+      chooseLevelRecipe();
+      chooseMascotVariant();
+      state.mode = "playing";
+      state.spawnClock = 0;
+      state.spawnEvery = state.baseSpawnEvery;
+      state.caught = 0;
+      state.lives = state.maxLives;
+      state.lifeCooldown = 4200;
+      state.combo = 0;
+      state.comboClock = 0;
+      state.mixClock = 0;
+      state.revealClock = 0;
+      state.screenKick = 0;
+      state.jarPulse = 0;
+      state.items.length = 0;
+      state.particles.length = 0;
+      state.splashes.length = 0;
+      state.floaters.length = 0;
+      jar.x = state.width / 2;
+      jar.targetX = jar.x;
+      updateMeters();
+      hideOverlay();
+      showToast("Level " + (state.levelIndex + 1) + ": " + state.recipe.name);
+    }
+
+    function updateMeters() {
+      levelMeter.textContent = (state.levelIndex + 1) + "/" + LEVELS.length;
+      livesMeter.textContent = String(state.lives);
+      blendMeter.textContent = state.caught + "/" + state.target;
+      scoreMeter.textContent = String(state.score);
+      updateRecipeHUD();
+    }
+
+    function showOverlay(title, text, action) {
+      overlayTitle.textContent = title;
+      overlayText.textContent = text;
+      primaryAction.textContent = action;
+      overlay.classList.remove("hidden");
+    }
+
+    function hideOverlay() {
+      overlay.classList.add("hidden");
+      overlay.classList.remove("reveal-result");
+    }
+
+    let toastTimer = 0;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 900);
+    }
+
+    function pickSpawnType() {
+      if (!state.recipe || state.mode !== "playing") {
+        return ALL_DROP_TYPES[Math.floor(Math.random() * ALL_DROP_TYPES.length)];
+      }
+
+      const level = currentLevel();
+      const badChance = Math.min(level.badChanceCap, level.badChanceBase + state.caught * level.badChanceGrowth);
+      if (state.caught > 0 && Math.random() < badChance) {
+        return BAD_TYPES[Math.floor(Math.random() * BAD_TYPES.length)];
+      }
+
+      const recipeIds = Object.keys(state.recipe.needs);
+      const unfinished = recipeIds.filter((id) => state.recipeProgress[id] < state.recipe.needs[id]);
+      if (unfinished.length && Math.random() < 0.72) {
+        return itemById[unfinished[Math.floor(Math.random() * unfinished.length)]];
+      }
+
+      if (Math.random() < 0.88) {
+        return itemById[recipeIds[Math.floor(Math.random() * recipeIds.length)]];
+      }
+
+      return ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+    }
+
+    function spawnItem() {
+      const type = pickSpawnType();
+      const level = currentLevel();
+      const size = type.bad ? rand(18, 28) : rand(16, 26);
+      const margin = Math.max(36, size * 2);
+      const speedBoost = Math.min(level.speedCap, state.caught * level.speedPerCatch);
+      state.items.push({
+        type,
+        x: rand(margin, state.width - margin),
+        y: -size * 2,
+        radius: size,
+        speed: rand(level.speedMin, level.speedMax) + speedBoost + (type.bad ? level.badSpeedBonus : 0),
+        spin: rand(-4, 4),
+        angle: rand(0, Math.PI * 2),
+        wobble: rand(0, Math.PI * 2)
+      });
+    }
+
+    function burst(x, y, color, count, power) {
+      for (let i = 0; i < count; i += 1) {
+        const angle = rand(0, Math.PI * 2);
+        const speed = rand(power * 0.35, power);
+        state.particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - rand(20, 100),
+          life: rand(360, 720),
+          maxLife: 720,
+          radius: rand(2, 5),
+          color
+        });
+      }
+    }
+
+    function addFloater(x, y, text, color) {
+      state.floaters.push({
+        x,
+        y,
+        text,
+        color,
+        life: 760,
+        maxLife: 760,
+        drift: rand(-24, 24)
+      });
+    }
+
+    function addSplash(item) {
+      state.splashes.push({
+        x: item.x,
+        y: jar.y - jar.height * 0.34,
+        radius: item.radius,
+        color: item.type.color,
+        life: 320,
+        maxLife: 320
+      });
+    }
+
+    function isRequiredAndUnfilled(type) {
+      if (!state.recipe || type.bad) {
+        return false;
+      }
+
+      const needed = state.recipe.needs[type.id] || 0;
+      const current = state.recipeProgress[type.id] || 0;
+      return needed > 0 && current < needed;
+    }
+
+    function catchItem(item, index) {
+      state.items.splice(index, 1);
+      state.jarPulse = 1;
+      state.screenKick = Math.max(state.screenKick, 0.12);
+      addSplash(item);
+      burst(item.x, item.y, item.type.color, 16, 230);
+
+      if (item.type.bad) {
+        state.combo = 0;
+        state.comboClock = 0;
+        state.score = Math.max(0, state.score + item.type.value);
+        state.screenKick = Math.max(state.screenKick, 0.45);
+        addFloater(item.x, item.y, String(item.type.value), item.type.color);
+        burst(item.x, item.y, COLORS.tar, 24, 250);
+        showToast(item.type.name + " jammed it");
+        updateMeters();
+        return;
+      }
+
+      const needed = state.recipe ? state.recipe.needs[item.type.id] || 0 : 1;
+      const current = state.recipeProgress[item.type.id] || 0;
+      if (needed && current < needed) {
+        state.combo += 1;
+        state.comboClock = 1200;
+        state.recipeProgress[item.type.id] = current + 1;
+        state.caught += 1;
+        const comboBonus = Math.min(12, state.combo * 2);
+        state.score += item.type.value + comboBonus;
+        addFloater(item.x, item.y, "+" + (item.type.value + comboBonus), item.type.color);
+
+        if (state.recipeProgress[item.type.id] === needed) {
+          showToast(item.type.name + " complete");
+        } else if (state.caught === state.target - 2) {
+          showToast("Two more");
+        } else if (state.caught === state.target - 1) {
+          showToast("One more");
+        }
+      } else {
+        const bonus = Math.ceil(item.type.value * 0.35);
+        state.combo = 0;
+        state.score += bonus;
+        addFloater(item.x, item.y, "bonus +" + bonus, "rgba(23, 27, 38, 0.72)");
+        burst(item.x, item.y, COLORS.paper, 8, 120);
+      }
+
+      updateMeters();
+
+      if (state.caught >= state.target) {
+        beginMixing();
+      }
+    }
+
+    function missItem(item) {
+      if (!isRequiredAndUnfilled(item.type) || state.mode !== "playing") {
+        return;
+      }
+
+      if (state.lifeCooldown > 0) {
+        addFloater(item.x, state.height - 140, "miss", "rgba(23, 27, 38, 0.72)");
+        return;
+      }
+
+      state.lives = Math.max(0, state.lives - 1);
+      state.lifeCooldown = 2600;
+      state.combo = 0;
+      state.comboClock = 0;
+      state.screenKick = Math.max(state.screenKick, 0.38);
+      addFloater(item.x, state.height - 140, "-1 life", COLORS.coral);
+      burst(item.x, state.height - 112, COLORS.coral, 18, 230);
+      updateMeters();
+
+      if (state.lives <= 0) {
+        gameOver();
+      } else {
+        showToast(item.type.name + " missed");
+      }
+    }
+
+    function gameOver() {
+      state.mode = "gameOver";
+      state.items.length = 0;
+      state.combo = 0;
+      state.comboClock = 0;
+      showOverlay("Blend Busted", "Too many recipe drops got away.", "Try Again");
+    }
+
+    function beginMixing() {
+      state.mode = "mixing";
+      state.mixClock = 0;
+      state.screenKick = 1.2;
+      state.items.length = 0;
+      jar.targetX = state.width / 2;
+      showToast("Blending " + state.recipe.name);
+      burst(jar.x, jar.y - jar.height * 0.42, COLORS.gold, 48, 380);
+    }
+
+    function finishReveal() {
+      state.mode = "reveal";
+      state.revealClock = 0;
+      state.screenKick = 0.25;
+      hideOverlay();
+      burst(state.width / 2, jar.y - jar.height * 1.35, state.activeCharacter.color, 42, 420);
+      burst(state.width / 2, jar.y - jar.height * 1.25, state.activeCharacter.accent, 36, 360);
+    }
+
+    function update(dt) {
+      const dtSec = dt / 1000;
+      if (state.mode === "playing") {
+        const level = currentLevel();
+        state.spawnClock += dt;
+        state.spawnEvery = Math.max(level.minSpawnEvery, state.baseSpawnEvery - state.caught * level.spawnStep - (state.maxLives - state.lives) * 20);
+        if (state.spawnClock >= state.spawnEvery) {
+          state.spawnClock = 0;
+          spawnItem();
+        }
+      }
+
+      if (state.mode === "mixing") {
+        state.mixClock += dt;
+        jar.targetX = state.width / 2;
+        state.screenKick = Math.max(state.screenKick, 0.7);
+        if (state.mixClock > 2800) {
+          finishReveal();
+        } else if (Math.random() < 0.45) {
+          const px = jar.x + rand(-jar.width * 0.34, jar.width * 0.34);
+          const py = jar.y - jar.height * 0.44 + rand(-8, 8);
+          burst(px, py, ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)].color, 2, 150);
+        }
+      }
+
+      if (state.mode === "reveal") {
+        state.revealClock += dt;
+        if (state.revealClock > 1200 && overlay.classList.contains("hidden")) {
+          const isFinalLevel = state.levelIndex >= LEVELS.length - 1;
+          const nextLevel = LEVELS[state.levelIndex + 1];
+          overlay.classList.add("reveal-result");
+          if (isFinalLevel) {
+            showOverlay(state.activeCharacter.name + "!", "All 4 levels cleared. Final score " + state.score + ".", "Play Again");
+          } else {
+            showOverlay(state.activeCharacter.name + "!", currentLevel().name + " cleared. Next: " + nextLevel.name + ".", "Next Level");
+          }
+        }
+      }
+
+      updateJar(dtSec);
+      updateItems(dtSec);
+      updateParticles(dt);
+      updateSplashes(dt);
+      updateFloaters(dt);
+      state.comboClock = Math.max(0, state.comboClock - dt);
+      state.lifeCooldown = Math.max(0, state.lifeCooldown - dt);
+      if (state.comboClock === 0) {
+        state.combo = 0;
+      }
+      state.jarPulse = Math.max(0, state.jarPulse - dtSec * 4);
+      state.screenKick = Math.max(0, state.screenKick - dtSec * 1.7);
+    }
+
+    function updateJar(dtSec) {
+      const keyboardSpeed = 680;
+      if (state.keys.has("ArrowLeft") || state.keys.has("KeyA")) {
+        jar.targetX -= keyboardSpeed * dtSec;
+      }
+      if (state.keys.has("ArrowRight") || state.keys.has("KeyD")) {
+        jar.targetX += keyboardSpeed * dtSec;
+      }
+      jar.targetX = clamp(jar.targetX, jar.width * 0.55, state.width - jar.width * 0.55);
+
+      const stiffness = state.mode === "mixing" ? 17 : 12;
+      jar.x += (jar.targetX - jar.x) * Math.min(1, dtSec * stiffness);
+      jar.x = clamp(jar.x, jar.width * 0.55, state.width - jar.width * 0.55);
+    }
+
+    function updateItems(dtSec) {
+      for (let i = state.items.length - 1; i >= 0; i -= 1) {
+        const item = state.items[i];
+        if (!item) {
+          continue;
+        }
+        item.y += item.speed * dtSec;
+        item.x += Math.sin(performance.now() / 230 + item.wobble) * 36 * dtSec;
+        item.angle += item.spin * dtSec;
+
+        const rimY = jar.y - jar.height * 0.36;
+        const jarLeft = jar.x - jar.width * 0.48;
+        const jarRight = jar.x + jar.width * 0.48;
+        const catchBand = item.y + item.radius > rimY && item.y - item.radius < jar.y + jar.height * 0.1;
+        if (state.mode === "playing" && catchBand && item.x > jarLeft && item.x < jarRight) {
+          catchItem(item, i);
+          continue;
+        }
+
+        if (item.y - item.radius > state.height + 80) {
+          state.items.splice(i, 1);
+          missItem(item);
+          if (state.mode !== "playing") {
+            break;
+          }
+        }
+      }
+    }
+
+    function updateParticles(dt) {
+      const dtSec = dt / 1000;
+      for (let i = state.particles.length - 1; i >= 0; i -= 1) {
+        const p = state.particles[i];
+        p.life -= dt;
+        p.vy += 520 * dtSec;
+        p.x += p.vx * dtSec;
+        p.y += p.vy * dtSec;
+        if (p.life <= 0) {
+          state.particles.splice(i, 1);
+        }
+      }
+    }
+
+    function updateSplashes(dt) {
+      for (let i = state.splashes.length - 1; i >= 0; i -= 1) {
+        const s = state.splashes[i];
+        s.life -= dt;
+        if (s.life <= 0) {
+          state.splashes.splice(i, 1);
+        }
+      }
+    }
+
+    function updateFloaters(dt) {
+      const dtSec = dt / 1000;
+      for (let i = state.floaters.length - 1; i >= 0; i -= 1) {
+        const floater = state.floaters[i];
+        floater.life -= dt;
+        floater.y -= 72 * dtSec;
+        floater.x += floater.drift * dtSec;
+        if (floater.life <= 0) {
+          state.floaters.splice(i, 1);
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, state.width, state.height);
+      ctx.save();
+      applyScreenShake();
+      drawKitchen();
+      drawDropLane();
+      drawItems();
+      drawMixingEnergy();
+      if (state.mode === "reveal") {
+        drawCharacter();
+      }
+      drawMixer();
+      drawParticles();
+      drawFloaters();
+      ctx.restore();
+    }
+
+    function applyScreenShake() {
+      if (state.screenKick <= 0) {
+        return;
+      }
+      const amount = state.screenKick * (state.mode === "mixing" ? 9 : 4);
+      ctx.translate(rand(-amount, amount), rand(-amount, amount));
+    }
+
+    function drawKitchen() {
+      const h = state.height;
+      const w = state.width;
+      const level = currentLevel();
+      const background = gameAssets.backgrounds[level.background] || gameAssets.background;
+      if (isImageReady(background)) {
+        drawImageCover(background, 0, 0, w, h);
+        ctx.fillStyle = "rgba(255, 236, 198, " + level.backgroundWash + ")";
+        ctx.fillRect(0, 0, w, h);
+        return;
+      }
+
+      ctx.fillStyle = "#ffecc6";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "rgba(23, 27, 38, 0.06)";
+      ctx.lineWidth = 1;
+      const step = 44;
+      for (let x = 0; x < w + step; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h + step; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "rgba(18, 165, 148, 0.16)";
+      ctx.fillRect(0, h - 120, w, 120);
+      ctx.fillStyle = "rgba(23, 27, 38, 0.11)";
+      ctx.fillRect(0, h - 120, w, 4);
+      ctx.fillStyle = "rgba(255, 248, 236, 0.56)";
+      for (let x = -60; x < w + 80; x += 130) {
+        roundedRect(x, h - 88, 82, 18, 8);
+        ctx.fill();
+      }
+    }
+
+    function drawDropLane() {
+      const center = state.width / 2;
+      ctx.save();
+      ctx.globalAlpha = state.mode === "playing" ? 1 : 0.55;
+      ctx.fillStyle = "rgba(255, 248, 236, 0.55)";
+      roundedRect(center - 78, 86, 156, Math.max(120, state.height - 250), 8);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(23, 27, 38, 0.08)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawItems() {
+      for (const item of state.items) {
+        drawIngredient(item.x, item.y, item.radius, item.angle, item.type);
+      }
+    }
+
+    function drawMixingEnergy() {
+      if (state.mode !== "mixing") {
+        return;
+      }
+
+      const t = state.mixClock / 1000;
+      const colors = [COLORS.coral, COLORS.gold, COLORS.teal, COLORS.blue];
+      ctx.save();
+      ctx.translate(jar.x, jar.y - jar.height * 0.22);
+      ctx.globalAlpha = 0.72;
+      for (let i = 0; i < 4; i += 1) {
+        ctx.rotate(Math.PI / 2);
+        ctx.strokeStyle = colors[i];
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        const wobble = Math.sin(t * 24 + i) * 12;
+        ctx.moveTo(0, -jar.height * 0.25);
+        ctx.quadraticCurveTo(jar.width * 0.52 + wobble, -jar.height * 0.55, jar.width * 0.82, -jar.height * 0.08);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 0.26;
+      ctx.fillStyle = COLORS.gold;
+      ctx.beginPath();
+      ctx.ellipse(0, -jar.height * 0.12, jar.width * 0.95, jar.height * 0.72, t * 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawIngredient(x, y, radius, angle, type) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.fillStyle = "rgba(23, 27, 38, 0.16)";
+      ctx.beginPath();
+      ctx.ellipse(3, radius * 0.72, radius * 0.72, radius * 0.24, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (drawDropSprite(type, radius)) {
+        ctx.restore();
+        return;
+      }
+
+      ctx.fillStyle = type.color;
+      ctx.strokeStyle = COLORS.ink;
+      ctx.lineWidth = 2;
+      if (type.bad) {
+        ctx.beginPath();
+        for (let i = 0; i < type.sides; i += 1) {
+          const pointAngle = -Math.PI / 2 + (Math.PI * 2 * i) / type.sides;
+          const pointRadius = radius * (i % 2 === 0 ? 1 : 0.72);
+          const px = Math.cos(pointAngle) * pointRadius;
+          const py = Math.sin(pointAngle) * pointRadius;
+          if (i === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = type.accent;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-radius * 0.42, -radius * 0.35);
+        ctx.lineTo(radius * 0.38, radius * 0.32);
+        ctx.moveTo(radius * 0.42, -radius * 0.35);
+        ctx.lineTo(-radius * 0.38, radius * 0.32);
+        ctx.stroke();
+      } else if (type.sides === 4) {
+        roundedRect(-radius * 0.72, -radius * 0.72, radius * 1.44, radius * 1.44, 5);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        const sides = type.sides;
+        for (let i = 0; i < sides; i += 1) {
+          const pointAngle = -Math.PI / 2 + (Math.PI * 2 * i) / sides;
+          const pointRadius = radius * (i % 2 === 0 && sides === 6 ? 1 : 0.88);
+          const px = Math.cos(pointAngle) * pointRadius;
+          const py = Math.sin(pointAngle) * pointRadius;
+          if (i === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      if (!type.bad) {
+        ctx.fillStyle = type.accent;
+        ctx.beginPath();
+        ctx.arc(-radius * 0.22, -radius * 0.26, radius * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawDropSprite(type, radius) {
+      if (type.asset === "meme" && isImageReady(gameAssets.memeDrops)) {
+        const columns = 2;
+        const cellWidth = gameAssets.memeDrops.naturalWidth / columns;
+        const cellHeight = gameAssets.memeDrops.naturalHeight;
+        const col = type.sprite || 0;
+        const size = radius * 3.25;
+        ctx.drawImage(
+          gameAssets.memeDrops,
+          col * cellWidth,
+          0,
+          cellWidth,
+          cellHeight,
+          -size / 2,
+          -size / 2,
+          size,
+          size
+        );
+        return true;
+      }
+
+      if (type.asset === "poop" && isImageReady(gameAssets.poop)) {
+        const size = radius * 3.35;
+        ctx.drawImage(gameAssets.poop, -size / 2, -size / 2, size, size);
+        return true;
+      }
+
+      if (!isImageReady(gameAssets.drops) || typeof type.sprite !== "number") {
+        return false;
+      }
+
+      const columns = 4;
+      const rows = 3;
+      const cellWidth = gameAssets.drops.naturalWidth / columns;
+      const cellHeight = gameAssets.drops.naturalHeight / rows;
+      const col = type.sprite % columns;
+      const row = Math.floor(type.sprite / columns);
+      const size = radius * (type.bad ? 3.35 : 3.15);
+      ctx.drawImage(
+        gameAssets.drops,
+        col * cellWidth,
+        row * cellHeight,
+        cellWidth,
+        cellHeight,
+        -size / 2,
+        -size / 2,
+        size,
+        size
+      );
+      return true;
+    }
+
+    function drawMixer() {
+      const pulse = state.jarPulse;
+      const mixing = state.mode === "mixing";
+      const t = state.mixClock / 1000;
+      const shake = mixing ? Math.sin(t * 58) * 8 + rand(-3, 3) : 0;
+      const rotate = mixing ? Math.sin(t * 46) * 0.14 : 0;
+      const squash = 1 + pulse * 0.06 + (mixing ? Math.sin(t * 35) * 0.035 : 0);
+
+      ctx.save();
+      ctx.translate(jar.x + shake, jar.y);
+      ctx.rotate(rotate);
+      ctx.scale(1 + pulse * 0.035, squash);
+
+      drawJarShadow();
+      drawBase();
+      drawJarGlass(t, mixing);
+      drawJarLid(t, mixing);
+      drawHandle();
+      drawBlades(t, mixing);
+      drawSplashesInside();
+      ctx.restore();
+    }
+
+    function drawJarShadow() {
+      ctx.fillStyle = "rgba(23, 27, 38, 0.18)";
+      ctx.beginPath();
+      ctx.ellipse(0, jar.height * 0.42, jar.width * 0.58, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBase() {
+      const baseY = jar.height * 0.18;
+      const baseW = jar.width * 0.96;
+      const baseH = jar.height * 0.32;
+      const baseGradient = ctx.createLinearGradient(0, baseY, 0, baseY + baseH);
+      baseGradient.addColorStop(0, "#fff0d2");
+      baseGradient.addColorStop(0.58, "#d8c2a1");
+      baseGradient.addColorStop(1, "#1f232c");
+
+      ctx.fillStyle = "#171b26";
+      roundedRect(-baseW * 0.48, baseY + baseH * 0.62, baseW * 0.96, baseH * 0.36, 9);
+      ctx.fill();
+
+      ctx.fillStyle = baseGradient;
+      ctx.strokeStyle = "#171b26";
+      ctx.lineWidth = 4;
+      roundedRect(-baseW / 2, baseY, baseW, baseH * 0.78, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#1f232c";
+      roundedRect(-baseW * 0.48, baseY + baseH * 0.66, baseW * 0.96, baseH * 0.28, 8);
+      ctx.fill();
+
+      ctx.fillStyle = "#1f95c8";
+      ctx.strokeStyle = "#171b26";
+      ctx.lineWidth = 3;
+      roundedRect(-baseW * 0.28, baseY + baseH * 0.17, baseW * 0.34, baseH * 0.33, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      const dialX = -baseW * 0.11;
+      const dialY = baseY + baseH * 0.34;
+      const dialGradient = ctx.createRadialGradient(dialX - 4, dialY - 5, 3, dialX, dialY, 18);
+      dialGradient.addColorStop(0, "#fff0a3");
+      dialGradient.addColorStop(0.45, COLORS.gold);
+      dialGradient.addColorStop(1, "#9d6b12");
+      ctx.fillStyle = dialGradient;
+      ctx.strokeStyle = "#171b26";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(dialX, dialY, baseW * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(23, 27, 38, 0.58)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(dialX - 5, dialY + 5);
+      ctx.lineTo(dialX + 7, dialY - 7);
+      ctx.stroke();
+
+      ctx.fillStyle = COLORS.coral;
+      ctx.strokeStyle = "#171b26";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(baseW * 0.28, baseY + baseH * 0.31, baseW * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = COLORS.gold;
+      roundedRect(baseW * 0.08, baseY + baseH * 0.72, baseW * 0.26, baseH * 0.08, 5);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(23, 27, 38, 0.25)";
+      for (let i = 0; i < 8; i += 1) {
+        const px = -baseW * 0.39 + i * baseW * 0.1;
+        const py = baseY + baseH * (0.18 + (i % 3) * 0.13);
+        ctx.beginPath();
+        ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "#f3e4c9";
+      ctx.beginPath();
+      ctx.arc(jar.width * 0.31, jar.height * 0.29, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawJarGlass(t, mixing) {
+      const topW = jar.width * 0.82;
+      const bottomW = jar.width * 0.58;
+      const topY = -jar.height * 0.55;
+      const bottomY = jar.height * 0.2;
+      const glassGradient = ctx.createLinearGradient(-topW / 2, topY, topW / 2, bottomY);
+      glassGradient.addColorStop(0, "rgba(122, 237, 226, 0.62)");
+      glassGradient.addColorStop(0.46, "rgba(73, 194, 202, 0.36)");
+      glassGradient.addColorStop(1, "rgba(16, 96, 112, 0.48)");
+      ctx.fillStyle = glassGradient;
+      ctx.strokeStyle = COLORS.ink;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-topW / 2, topY);
+      ctx.lineTo(topW / 2, topY);
+      ctx.bezierCurveTo(topW * 0.42, -jar.height * 0.22, bottomW * 0.55, jar.height * 0.08, bottomW / 2, bottomY);
+      ctx.quadraticCurveTo(0, bottomY + 12, -bottomW / 2, bottomY);
+      ctx.bezierCurveTo(-bottomW * 0.55, jar.height * 0.08, -topW * 0.42, -jar.height * 0.22, -topW / 2, topY);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.24)";
+      ctx.beginPath();
+      ctx.ellipse(0, topY + 5, topW * 0.48, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const liquidY = mixing ? -jar.height * 0.17 + Math.sin(t * 42) * 7 : jar.height * 0.03;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(-topW / 2 + 5, topY + 6);
+      ctx.lineTo(topW / 2 - 5, topY + 6);
+      ctx.lineTo(bottomW / 2 - 5, bottomY - 7);
+      ctx.quadraticCurveTo(0, bottomY + 4, -bottomW / 2 + 5, bottomY - 7);
+      ctx.closePath();
+      ctx.clip();
+      const liquidGradient = ctx.createLinearGradient(0, liquidY - 30, 0, bottomY);
+      liquidGradient.addColorStop(0, mixing ? "rgba(244, 183, 64, 0.82)" : "rgba(18, 165, 148, 0.62)");
+      liquidGradient.addColorStop(1, mixing ? "rgba(239, 91, 91, 0.54)" : "rgba(73, 104, 217, 0.3)");
+      ctx.fillStyle = liquidGradient;
+      ctx.beginPath();
+      ctx.moveTo(-topW, liquidY);
+      for (let x = -topW; x <= topW; x += 12) {
+        ctx.lineTo(x, liquidY + Math.sin(x * 0.08 + t * 11) * (mixing ? 17 : 5));
+      }
+      ctx.lineTo(topW, bottomY);
+      ctx.lineTo(-topW, bottomY);
+      ctx.closePath();
+      ctx.fill();
+
+      if (mixing) {
+        const colors = [COLORS.coral, COLORS.teal, COLORS.blue, COLORS.purple];
+        for (let i = 0; i < 9; i += 1) {
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.globalAlpha = 0.52;
+          ctx.beginPath();
+          ctx.arc(
+            Math.sin(t * (8 + i) + i) * jar.width * 0.25,
+            -jar.height * 0.18 + Math.cos(t * (7 + i) + i) * jar.height * 0.23,
+            5 + (i % 3),
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.74)";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(-topW * 0.26, topY + 18);
+      ctx.lineTo(-bottomW * 0.2, bottomY - 22);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.34)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(topW * 0.22, topY + 16);
+      ctx.lineTo(bottomW * 0.18, bottomY - 18);
+      ctx.stroke();
+    }
+
+    function drawJarLid(t, mixing) {
+      const lift = state.mode === "reveal" ? -72 - Math.sin(state.revealClock / 160) * 10 : 0;
+      const twist = mixing ? Math.sin(t * 56) * 0.18 : 0;
+      ctx.save();
+      ctx.translate(0, -jar.height * 0.62 + lift);
+      ctx.rotate(twist);
+      ctx.fillStyle = "#1e232b";
+      roundedRect(-jar.width * 0.5, -8, jar.width, 18, 9);
+      ctx.fill();
+      ctx.fillStyle = "#43aedd";
+      ctx.strokeStyle = "#171b26";
+      ctx.lineWidth = 3;
+      roundedRect(-jar.width * 0.35, -28, jar.width * 0.7, 23, 11);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#1e232b";
+      roundedRect(-jar.width * 0.12, -42, jar.width * 0.24, 14, 8);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawHandle() {
+      ctx.strokeStyle = "#171b26";
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.arc(jar.width * 0.45, -jar.height * 0.14, jar.width * 0.25, -Math.PI * 0.5, Math.PI * 0.68);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(148, 242, 231, 0.72)";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(jar.width * 0.45, -jar.height * 0.14, jar.width * 0.16, -Math.PI * 0.48, Math.PI * 0.58);
+      ctx.stroke();
+    }
+
+    function drawBlades(t, mixing) {
+      const bladeY = jar.height * 0.05;
+      const spin = mixing ? t * 42 : t * 5;
+      ctx.save();
+      ctx.translate(0, bladeY);
+      ctx.rotate(spin);
+      ctx.strokeStyle = "#20242c";
+      ctx.lineWidth = 6;
+      for (let i = 0; i < 4; i += 1) {
+        ctx.rotate(Math.PI / 2);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(jar.width * 0.14, -7, jar.width * 0.29, 0);
+        ctx.stroke();
+      }
+      ctx.fillStyle = COLORS.gold;
+      ctx.beginPath();
+      ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawSplashesInside() {
+      for (const splash of state.splashes) {
+        const alpha = Math.max(0, splash.life / splash.maxLife);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = splash.color;
+        ctx.beginPath();
+        ctx.arc(splash.x - jar.x, splash.y - jar.y, splash.radius * (1.2 - alpha * 0.2), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawCharacter() {
+      const t = Math.min(1, state.revealClock / 600);
+      const ease = 1 - Math.pow(1 - t, 3);
+      if (isImageReady(gameAssets.mascots)) {
+        const image = gameAssets.mascots;
+        const columns = 2;
+        const rows = 2;
+        const cellWidth = image.naturalWidth / columns;
+        const cellHeight = image.naturalHeight / rows;
+        const sprite = state.activeCharacter.sprite || 0;
+        const col = sprite % columns;
+        const row = Math.floor(sprite / columns);
+        const targetHeight = clamp(state.height * 0.5, 250, 410) * (0.58 + ease * 0.42);
+        const targetWidth = targetHeight * (cellWidth / cellHeight);
+        const x = state.width / 2 - targetWidth / 2;
+        const baseY = jar.y - jar.height * 0.1;
+        const y = baseY - targetHeight - ease * jar.height * 0.28 + Math.sin(state.revealClock / 110) * 5;
+
+        ctx.save();
+        ctx.globalAlpha = 0.98;
+        ctx.drawImage(image, col * cellWidth, row * cellHeight, cellWidth, cellHeight, x, y, targetWidth, targetHeight);
+        ctx.restore();
+        return;
+      }
+
+      if (isImageReady(gameAssets.mascot)) {
+        const image = gameAssets.mascot;
+        const targetHeight = clamp(state.height * 0.5, 250, 410) * (0.58 + ease * 0.42);
+        const targetWidth = targetHeight * (image.naturalWidth / image.naturalHeight);
+        const x = state.width / 2 - targetWidth / 2;
+        const baseY = jar.y - jar.height * 0.1;
+        const y = baseY - targetHeight - ease * jar.height * 0.28 + Math.sin(state.revealClock / 110) * 5;
+
+        ctx.save();
+        ctx.globalAlpha = 0.98;
+        ctx.drawImage(image, x, y, targetWidth, targetHeight);
+        ctx.restore();
+        return;
+      }
+
+      const character = state.activeCharacter;
+      const x = state.width / 2;
+      const y = jar.y - jar.height * (0.88 + ease * 0.42) + Math.sin(state.revealClock / 110) * 5;
+      const size = clamp(jar.width * 0.34, 34, 52) * (0.65 + ease * 0.35);
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(1, 0.84 + Math.sin(state.revealClock / 130) * 0.04);
+      ctx.fillStyle = "rgba(23, 27, 38, 0.16)";
+      ctx.beginPath();
+      ctx.ellipse(0, size * 0.95, size * 0.9, size * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = character.color;
+      ctx.strokeStyle = COLORS.ink;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(0, 0, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = character.accent;
+      ctx.beginPath();
+      ctx.arc(-size * 0.28, -size * 0.32, size * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = COLORS.ink;
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.2, -size * 0.08);
+      ctx.lineTo(-size * 0.2, -size * 0.08);
+      ctx.moveTo(size * 0.25, -size * 0.08);
+      ctx.lineTo(size * 0.25, -size * 0.08);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(size * 0.02, size * 0.18, size * 0.28, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.52, -size * 0.72);
+      ctx.quadraticCurveTo(-size * 0.8, -size * 1.08, -size * 0.42, -size * 1.16);
+      ctx.moveTo(size * 0.52, -size * 0.72);
+      ctx.quadraticCurveTo(size * 0.8, -size * 1.08, size * 0.42, -size * 1.16);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      for (const p of state.particles) {
+        const alpha = clamp(p.life / p.maxLife, 0, 1);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius * (0.7 + alpha), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawFloaters() {
+      ctx.save();
+      ctx.font = "900 18px Inter, ui-sans-serif, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (const floater of state.floaters) {
+        const alpha = clamp(floater.life / floater.maxLife, 0, 1);
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = "rgba(255, 248, 236, 0.9)";
+        ctx.strokeText(floater.text, floater.x, floater.y);
+        ctx.fillStyle = floater.color;
+        ctx.fillText(floater.text, floater.x, floater.y);
+      }
+      ctx.restore();
+    }
+
+    function roundedRect(x, y, width, height, radius) {
+      const r = Math.min(radius, Math.abs(width) / 2, Math.abs(height) / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + width, y, x + width, y + height, r);
+      ctx.arcTo(x + width, y + height, x, y + height, r);
+      ctx.arcTo(x, y + height, x, y, r);
+      ctx.arcTo(x, y, x + width, y, r);
+      ctx.closePath();
+    }
+
+    function frame(now) {
+      const dt = Math.min(34, now - (state.lastTime || now));
+      state.lastTime = now;
+      update(dt);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    function setTargetFromEvent(event) {
+      const rect = shell.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      jar.targetX = clamp(x, jar.width * 0.55, state.width - jar.width * 0.55);
+    }
+
+    function isControlTarget(event) {
+      return Boolean(event.target.closest("button"));
+    }
+
+    shell.addEventListener("pointerdown", (event) => {
+      if (isControlTarget(event)) {
+        return;
+      }
+      state.pointerActive = true;
+      shell.setPointerCapture(event.pointerId);
+      setTargetFromEvent(event);
+    });
+
+    shell.addEventListener("pointermove", (event) => {
+      if (!state.pointerActive && event.pointerType !== "mouse") {
+        return;
+      }
+      setTargetFromEvent(event);
+    });
+
+    shell.addEventListener("pointerup", (event) => {
+      state.pointerActive = false;
+      if (shell.hasPointerCapture(event.pointerId)) {
+        shell.releasePointerCapture(event.pointerId);
+      }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      state.keys.add(event.code);
+      if ((event.code === "Space" || event.code === "Enter") && state.mode !== "playing" && state.mode !== "mixing") {
+        handlePrimaryAction();
+      }
+    });
+
+    window.addEventListener("keyup", (event) => {
+      state.keys.delete(event.code);
+    });
+
+    function handlePrimaryAction() {
+      if (state.mode === "reveal" && state.levelIndex < LEVELS.length - 1) {
+        startNextLevel();
+        return;
+      }
+
+      resetGame();
+    }
+
+    primaryAction.addEventListener("click", handlePrimaryAction);
+
+    window.addEventListener("resize", resize);
+    resize();
+    chooseLevelRecipe();
+    chooseMascotVariant();
+    updateMeters();
+    showOverlay("Ready?", "Clear 4 clay levels to mint the final T00n.", "Start Level 1");
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
