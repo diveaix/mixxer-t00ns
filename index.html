@@ -39,16 +39,16 @@
 
     .game-shell {
       position: relative;
-      width: min(100vw, 1280px);
-      height: min(100vh, 820px);
-      min-height: 520px;
+      width: 100vw;
+      height: 100dvh;
+      min-height: 480px;
       overflow: hidden;
       background:
         linear-gradient(90deg, rgba(23, 27, 38, 0.05) 1px, transparent 1px),
         linear-gradient(0deg, rgba(23, 27, 38, 0.05) 1px, transparent 1px),
         #ffecc6;
       background-size: 44px 44px;
-      box-shadow: 0 28px 90px var(--shadow);
+      box-shadow: none;
       touch-action: none;
       user-select: none;
     }
@@ -61,12 +61,12 @@
 
     .hud {
       position: absolute;
-      top: 18px;
-      left: 18px;
-      right: 18px;
+      top: 10px;
+      left: 10px;
+      right: 10px;
       display: grid;
-      grid-template-columns: minmax(260px, 1.05fr) minmax(300px, 0.95fr) auto;
-      gap: 14px;
+      grid-template-columns: minmax(180px, 0.62fr) minmax(250px, 0.58fr) minmax(220px, auto);
+      gap: 8px;
       align-items: start;
       pointer-events: none;
     }
@@ -74,8 +74,8 @@
     .brand,
     .recipe-card {
       width: fit-content;
-      max-width: min(520px, calc(100vw - 36px));
-      padding: 10px;
+      max-width: min(350px, calc(100vw - 20px));
+      padding: 6px;
       background:
         linear-gradient(135deg, rgba(255, 250, 238, 0.95), rgba(238, 224, 199, 0.9)),
         var(--panel);
@@ -84,23 +84,23 @@
       box-shadow:
         inset 0 2px 0 rgba(255, 255, 255, 0.55),
         inset 0 -7px 18px rgba(91, 72, 49, 0.08),
-        0 13px 28px rgba(23, 27, 38, 0.16);
+        0 7px 16px rgba(23, 27, 38, 0.12);
       backdrop-filter: blur(14px);
     }
 
     .brand {
       display: grid;
-      grid-template-columns: 104px minmax(0, 1fr);
-      gap: 14px;
+      grid-template-columns: 50px minmax(0, 1fr);
+      gap: 8px;
       align-items: center;
-      width: min(500px, 100%);
+      width: min(290px, 100%);
     }
 
     .brand-mark {
-      width: 104px;
-      height: 84px;
+      width: 50px;
+      height: 40px;
       object-fit: contain;
-      filter: drop-shadow(0 7px 7px rgba(23, 27, 38, 0.2));
+      filter: drop-shadow(0 4px 4px rgba(23, 27, 38, 0.16));
     }
 
     .brand-copy {
@@ -109,21 +109,21 @@
 
     .recipe-card {
       justify-self: center;
-      width: min(440px, 100%);
+      width: min(340px, 100%);
       max-width: none;
     }
 
     .brand h1 {
       margin: 0;
-      font-size: clamp(25px, 3.4vw, 44px);
+      font-size: clamp(18px, 1.9vw, 26px);
       line-height: 0.95;
       letter-spacing: 0;
       font-weight: 900;
     }
 
     .brand p {
-      margin: 6px 0 0;
-      font-size: 12px;
+      margin: 4px 0 0;
+      font-size: 11px;
       line-height: 1.35;
       color: rgba(23, 27, 38, 0.68);
       font-weight: 700;
@@ -133,12 +133,12 @@
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 6px;
+      margin-bottom: 5px;
     }
 
     .recipe-heading span {
-      font-size: 10px;
+      font-size: 8px;
       line-height: 1;
       color: rgba(23, 27, 38, 0.62);
       font-weight: 900;
@@ -147,7 +147,7 @@
     }
 
     .recipe-heading strong {
-      font-size: 16px;
+      font-size: 12px;
       line-height: 1;
       font-weight: 950;
       text-align: right;
@@ -156,37 +156,40 @@
     .recipe-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 9px;
+      gap: 5px;
     }
 
     .recipe-chip {
       display: grid;
       grid-template-columns: auto 1fr;
-      gap: 8px;
+      gap: 5px;
       align-items: center;
-      min-height: 42px;
-      padding: 6px 9px 6px 7px;
-      border: 2px solid rgba(23, 27, 38, 0.16);
+      min-height: 27px;
+      padding: 3px 6px 3px 4px;
+      border: 1px solid rgba(23, 27, 38, 0.16);
       border-radius: 8px;
       background: rgba(255, 252, 244, 0.62);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.72),
-        0 4px 0 rgba(23, 27, 38, 0.06);
+        0 2px 0 rgba(23, 27, 38, 0.05);
       font-weight: 900;
-      font-size: 12px;
+      font-size: 10px;
       line-height: 1;
     }
 
     .recipe-chip.is-complete {
-      background: rgba(18, 165, 148, 0.18);
-      border-color: rgba(18, 165, 148, 0.55);
+      background: rgba(255, 252, 244, 0.72);
+      border-color: rgba(18, 165, 148, 0.42);
+      box-shadow:
+        inset 3px 0 0 rgba(18, 165, 148, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.74);
     }
 
     .recipe-dot {
-      width: 32px;
-      height: 32px;
+      width: 20px;
+      height: 20px;
       border: 1px solid rgba(23, 27, 38, 0.12);
-      border-radius: 8px;
+      border-radius: 7px;
       background-color: rgba(255, 255, 255, 0.36);
       background-repeat: no-repeat;
       background-position: center;
@@ -202,15 +205,15 @@
 
     .meters {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       align-items: start;
       justify-content: end;
       flex-wrap: wrap;
     }
 
     .meter {
-      min-width: 88px;
-      padding: 10px 12px 11px;
+      min-width: 58px;
+      padding: 5px 7px 6px;
       background:
         linear-gradient(135deg, rgba(255, 250, 238, 0.95), rgba(238, 224, 199, 0.9)),
         var(--panel);
@@ -219,14 +222,14 @@
       box-shadow:
         inset 0 2px 0 rgba(255, 255, 255, 0.56),
         inset 0 -6px 13px rgba(91, 72, 49, 0.08),
-        0 11px 24px rgba(23, 27, 38, 0.15);
+        0 6px 14px rgba(23, 27, 38, 0.12);
       backdrop-filter: blur(14px);
       text-align: center;
     }
 
     .meter span {
       display: block;
-      font-size: 10px;
+      font-size: 8px;
       line-height: 1;
       color: rgba(23, 27, 38, 0.62);
       font-weight: 900;
@@ -236,8 +239,8 @@
 
     .meter strong {
       display: block;
-      margin-top: 4px;
-      font-size: 23px;
+      margin-top: 2px;
+      font-size: 16px;
       line-height: 1;
       font-variant-numeric: tabular-nums;
       font-weight: 900;
@@ -256,9 +259,23 @@
       place-items: end center;
     }
 
+    .overlay.reveal-result .dialog {
+      width: min(320px, calc(100vw - 24px));
+      padding: 12px 14px 14px;
+    }
+
+    .overlay.reveal-result .dialog h2 {
+      font-size: clamp(28px, 4vw, 38px);
+    }
+
+    .overlay.reveal-result .dialog p {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
     .dialog {
-      width: min(430px, calc(100vw - 40px));
-      padding: 22px 24px 24px;
+      width: min(380px, calc(100vw - 24px));
+      padding: 18px 20px 20px;
       background:
         linear-gradient(135deg, rgba(255, 251, 242, 0.96), rgba(239, 225, 202, 0.93)),
         rgba(255, 248, 236, 0.94);
@@ -267,7 +284,7 @@
       box-shadow:
         inset 0 2px 0 rgba(255, 255, 255, 0.58),
         inset 0 -9px 24px rgba(91, 72, 49, 0.08),
-        0 24px 54px rgba(23, 27, 38, 0.22);
+        0 18px 42px rgba(23, 27, 38, 0.2);
       text-align: center;
       transform: translateY(0);
       transition: opacity 180ms ease, transform 180ms ease;
@@ -282,14 +299,14 @@
 
     .dialog h2 {
       margin: 0;
-      font-size: clamp(30px, 5.4vw, 52px);
+      font-size: clamp(27px, 4.5vw, 42px);
       line-height: 0.94;
       letter-spacing: 0;
       font-weight: 950;
     }
 
     .dialog p {
-      margin: 14px auto 0;
+      margin: 10px auto 0;
       max-width: 32ch;
       color: rgba(23, 27, 38, 0.72);
       font-weight: 750;
@@ -300,12 +317,12 @@
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 22px;
+      margin-top: 16px;
     }
 
     button {
-      min-width: 140px;
-      min-height: 46px;
+      min-width: 122px;
+      min-height: 40px;
       border: 2px solid var(--ink);
       border-radius: 8px;
       background: var(--ink);
@@ -335,14 +352,14 @@
     .toast {
       position: absolute;
       left: 50%;
-      bottom: 24px;
-      width: min(360px, calc(100vw - 40px));
-      padding: 10px 12px;
+      bottom: 18px;
+      width: min(320px, calc(100vw - 24px));
+      padding: 8px 10px;
       border-radius: 8px;
       background: rgba(23, 27, 38, 0.88);
       color: white;
       text-align: center;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.25;
       font-weight: 800;
       transform: translate(-50%, 0);
@@ -359,27 +376,33 @@
     @media (max-width: 720px) {
       .game-shell {
         width: 100vw;
-        height: 100vh;
-        min-height: 100vh;
+        height: 100dvh;
+        min-height: 100dvh;
       }
 
       .hud {
-        top: 12px;
-        left: 12px;
-        right: 12px;
+        top: 6px;
+        left: 5px;
+        right: 5px;
         grid-template-columns: 1fr;
+        gap: 5px;
       }
 
       .brand {
-        padding: 10px 12px;
-        grid-template-columns: 68px minmax(0, 1fr);
-        gap: 9px;
-        width: fit-content;
+        padding: 5px 7px;
+        grid-template-columns: 32px minmax(0, 1fr);
+        gap: 6px;
+        width: min(100%, 238px);
       }
 
       .brand-mark {
-        width: 68px;
-        height: 56px;
+        width: 32px;
+        height: 28px;
+      }
+
+      .brand h1 {
+        font-size: clamp(18px, 5.25vw, 21px);
+        line-height: 1;
       }
 
       .brand p {
@@ -388,42 +411,118 @@
 
       .recipe-card {
         justify-self: start;
-        width: min(100%, 420px);
-        padding: 10px 12px;
+        width: min(100%, 380px);
+        padding: 5px;
       }
 
       .recipe-heading {
-        margin-bottom: 8px;
+        margin-bottom: 4px;
+      }
+
+      .recipe-heading span {
+        font-size: 8px;
+      }
+
+      .recipe-heading strong {
+        font-size: 12px;
       }
 
       .recipe-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+      }
+
+      .recipe-chip {
+        min-height: 25px;
+        gap: 3px;
+        padding: 2px 4px 2px 3px;
+        border-width: 1px;
+        font-size: 8px;
+      }
+
+      .recipe-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
       }
 
       .meters {
+        display: flex;
         justify-content: start;
+        flex-wrap: nowrap;
+        gap: 5px;
       }
 
       .meter {
-        min-width: 78px;
-        padding: 8px 10px;
+        min-width: 52px;
+        padding: 4px 3px;
+        border-width: 1px;
+      }
+
+      .meter span {
+        font-size: 7px;
       }
 
       .meter strong {
-        font-size: 20px;
+        margin-top: 2px;
+        font-size: 14px;
       }
 
       .overlay {
         place-items: end center;
-        padding: 18px 16px 184px;
+        padding: 12px 8px 220px;
       }
 
       .overlay.reveal-result {
-        padding-bottom: 20px;
+        padding-bottom: 14px;
       }
 
       .dialog {
-        padding: 20px;
+        width: min(286px, calc(100vw - 16px));
+        padding: 10px;
+      }
+
+      .dialog h2 {
+        font-size: clamp(23px, 7vw, 28px);
+      }
+
+      .dialog p {
+        margin-top: 7px;
+        font-size: 12px;
+      }
+
+      .dialog-actions {
+        margin-top: 12px;
+      }
+
+      button {
+        min-width: 100px;
+        min-height: 34px;
+      }
+    }
+
+    @media (min-width: 540px) and (max-width: 720px) {
+      .hud {
+        grid-template-columns: minmax(220px, max-content) 1fr;
+        gap: 5px 8px;
+      }
+
+      .brand {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .meters {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+        align-self: start;
+      }
+
+      .recipe-card {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: min(430px, calc(100vw - 16px));
       }
     }
   </style>
@@ -437,7 +536,6 @@
         <img class="brand-mark" src="assets/mixer-t00ns-logo.png" alt="Mascot leaning on mixer jar">
         <div class="brand-copy">
           <h1>Mixer T00ns</h1>
-          <p>Collect the recipe, dodge the trash, mint a T00n.</p>
         </div>
       </div>
       <div class="recipe-card" aria-label="Recipe target">
@@ -781,9 +879,9 @@
       canvas.width = Math.floor(state.width * state.dpr);
       canvas.height = Math.floor(state.height * state.dpr);
       ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
-      jar.width = clamp(state.width * 0.13, 92, 138);
-      jar.height = clamp(state.height * 0.16, 108, 144);
-      jar.y = state.height - jar.height * 0.6 - 28;
+      jar.width = clamp(state.width * 0.105, 72, 110);
+      jar.height = clamp(state.height * 0.14, 86, 118);
+      jar.y = state.height - jar.height * 0.56 - 18;
       if (!jar.x) {
         jar.x = state.width / 2;
         jar.targetX = jar.x;
@@ -889,8 +987,8 @@
     function spawnItem() {
       const type = pickSpawnType();
       const level = currentLevel();
-      const size = type.bad ? rand(18, 28) : rand(16, 26);
-      const margin = Math.max(36, size * 2);
+      const size = type.bad ? rand(15, 23) : rand(14, 22);
+      const margin = Math.max(30, size * 2);
       const speedBoost = Math.min(level.speedCap, state.caught * level.speedPerCatch);
       state.items.push({
         type,
@@ -1204,7 +1302,9 @@
       if (state.mode === "reveal") {
         drawCharacter();
       }
-      drawMixer();
+      if (state.mode !== "reveal") {
+        drawMixer();
+      }
       drawParticles();
       drawFloaters();
       ctx.restore();
@@ -1250,12 +1350,12 @@
       }
 
       ctx.fillStyle = "rgba(18, 165, 148, 0.16)";
-      ctx.fillRect(0, h - 120, w, 120);
+      ctx.fillRect(0, h - 104, w, 104);
       ctx.fillStyle = "rgba(23, 27, 38, 0.11)";
-      ctx.fillRect(0, h - 120, w, 4);
+      ctx.fillRect(0, h - 104, w, 3);
       ctx.fillStyle = "rgba(255, 248, 236, 0.56)";
-      for (let x = -60; x < w + 80; x += 130) {
-        roundedRect(x, h - 88, 82, 18, 8);
+      for (let x = -50; x < w + 70; x += 112) {
+        roundedRect(x, h - 76, 64, 14, 7);
         ctx.fill();
       }
     }
@@ -1265,7 +1365,7 @@
       ctx.save();
       ctx.globalAlpha = state.mode === "playing" ? 1 : 0.55;
       ctx.fillStyle = "rgba(255, 248, 236, 0.55)";
-      roundedRect(center - 78, 86, 156, Math.max(120, state.height - 250), 8);
+      roundedRect(center - 64, 76, 128, Math.max(110, state.height - 230), 8);
       ctx.fill();
       ctx.strokeStyle = "rgba(23, 27, 38, 0.08)";
       ctx.lineWidth = 2;
@@ -1706,7 +1806,7 @@
         const sprite = state.activeCharacter.sprite || 0;
         const col = sprite % columns;
         const row = Math.floor(sprite / columns);
-        const targetHeight = clamp(state.height * 0.5, 250, 410) * (0.58 + ease * 0.42);
+        const targetHeight = clamp(state.height * 0.46, 220, 360) * (0.58 + ease * 0.42);
         const targetWidth = targetHeight * (cellWidth / cellHeight);
         const x = state.width / 2 - targetWidth / 2;
         const baseY = jar.y - jar.height * 0.1;
@@ -1721,7 +1821,7 @@
 
       if (isImageReady(gameAssets.mascot)) {
         const image = gameAssets.mascot;
-        const targetHeight = clamp(state.height * 0.5, 250, 410) * (0.58 + ease * 0.42);
+        const targetHeight = clamp(state.height * 0.46, 220, 360) * (0.58 + ease * 0.42);
         const targetWidth = targetHeight * (image.naturalWidth / image.naturalHeight);
         const x = state.width / 2 - targetWidth / 2;
         const baseY = jar.y - jar.height * 0.1;
